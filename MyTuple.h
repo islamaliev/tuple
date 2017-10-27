@@ -36,18 +36,6 @@ public:
 
 };
 
-template<bool cond, class T1, class T2>
-struct Condition
-{
-	typedef T2 type;
-};
-
-template<class T1, class T2>
-struct Condition<true, T1, T2>
-{
-	typedef T1 type;
-};
-
 template<int current, int sought, class... Types>
 struct TypesPicker {};
 
@@ -63,10 +51,18 @@ struct TypesPicker<current, sought, T, Types...>
 	typedef typename TypesPicker<current + 1, sought, Types...>::type type;
 };
 
+template<class... Types>
+struct MemberOffset { enum { value = 0 }; };
+
 template<int index, class ... Types>
 auto get(tuple<Types...>& t) -> typename TypesPicker<0, index, Types...>::type
 {
-	return 0;
+	auto size = sizeof(t);
+	auto pT = &t;
+	auto p = reinterpret_cast<char*>(&t.m_values);
+	p += MemberOffset<Types...>::value;
+	auto val = static_cast<typename TypesPicker<0, index, Types...>::type>(*p);
+	return val;
 }
 
 }

@@ -7,7 +7,7 @@ using namespace ns;
 
 int main()
 {
-	tuple<int, double> t(1, 0.5);
+	tuple<int, float> t(1, 0.5);
 	auto i = get<0>(t);
 	auto d = get<1>(t);
 	std::cout << i << std::endl;
