@@ -4,19 +4,26 @@ namespace ns
 template<class... Args>
 struct ValueHolder;
 
-template<>
-struct ValueHolder<> { };
-
-template<class T, class... Args>
-struct ValueHolder<T, Args...> : ValueHolder<Args...> 
-{
-	ValueHolder(T val1, Args... args)
-		: ValueHolder<Args...>(args...)
-		, val(val1)
+template<class T>
+struct ValueHolder<T> 
+{ 
+	ValueHolder(T v)
+		: val(v)
 	{}
 
-	typedef T type;
 	T val;
+};
+
+template<class T, class... Args>
+struct ValueHolder<T, Args...> 
+{
+	ValueHolder(T val1, Args... args)
+		: val(val1)
+		, other(args...)
+	{}
+
+	T val;
+	ValueHolder<Args...> other;
 };
 
 template<class... Args>
@@ -27,13 +34,7 @@ public:
 		: m_values(args...)
 	{}
 
-	typename ValueHolder<Args...>::type get() const 
-	{ 
-		return m_values.val; 
-	}
-
 	ValueHolder<Args...> m_values;
-
 };
 
 template<int current, int sought, class... Types>
@@ -51,17 +52,25 @@ struct TypesPicker<current, sought, T, Types...>
 	typedef typename TypesPicker<current + 1, sought, Types...>::type type;
 };
 
-template<class... Types>
-struct MemberOffset { enum { value = 0 }; };
+template<int current, int sought, class... Types>
+struct ValuePicker {};
+
+template<int sought, class T, class... Types>
+struct ValuePicker<sought, sought, T, Types...>
+{
+	static auto& get(ValueHolder<T, Types...>& vh) { return vh.val; }
+};
+
+template<int current, int sought, class T, class... Types>
+struct ValuePicker<current, sought, T, Types...>
+{
+	static auto& get(ValueHolder<T, Types...>& vh) { return ValuePicker<current + 1, sought, Types...>::get(vh.other); }
+};
 
 template<int index, class ... Types>
 auto get(tuple<Types...>& t) -> typename TypesPicker<0, index, Types...>::type
 {
-	auto size = sizeof(t);
-	auto pT = &t;
-	auto p = reinterpret_cast<char*>(&t.m_values);
-	p += MemberOffset<Types...>::value;
-	auto val = static_cast<typename TypesPicker<0, index, Types...>::type>(*p);
+	auto& val = ValuePicker<0, index, Types...>::get(t.m_values);
 	return val;
 }
 
