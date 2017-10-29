@@ -1,7 +1,7 @@
 namespace ns
 { 
 
-template<class... Args>
+template<class... Types>
 struct ValueHolder;
 
 template<class T>
@@ -14,26 +14,27 @@ struct ValueHolder<T>
 	T val;
 };
 
-template<class T, class... Args>
-struct ValueHolder<T, Args...> 
+template<class T, class... Types>
+struct ValueHolder<T, Types...> 
 {
-	ValueHolder(T val1, Args... args)
+	ValueHolder(T val1, Types... args)
 		: val(val1)
 		, other(args...)
 	{}
 
 	T val;
-	ValueHolder<Args...> other;
+	ValueHolder<Types...> other;
 };
 
-template<class... Args>
+template<class... Types>
 struct tuple
 {
-	tuple(Args... args)
-		: values(args...)
+	template<class... Types2>
+	tuple(Types2&&... args)
+		: values(std::forward<Types2>(args)...)
 	{}
 
-	ValueHolder<Args...> values;
+	ValueHolder<Types...> values;
 };
 
 template<int current, int sought, class... Types>
@@ -81,9 +82,9 @@ struct tuple_size<tuple<Types...>>
 };
 
 template<class... Types>
-tuple<Types...> make_tuple(Types... args)
+tuple<Types...> make_tuple(Types&&... args)
 {
-	return tuple<Types...>(args...);
+	return tuple<Types...>(std::forward<Types>(args)...);
 }
 
 }
