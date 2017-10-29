@@ -56,9 +56,29 @@ struct TupleIterator<current, sought, T, Types...>
 template<int index, class ... Types>
 auto get(tuple<Types...>& t) -> typename TupleIterator<0, index, Types...>::type&
 {
-	auto& val = TupleIterator<0, index, Types...>::get(t.values);
-	return val;
+	return TupleIterator<0, index, Types...>::get(t.values);
 }
+
+template<class... Types>
+struct TypesCounter 
+{
+	enum { value = 1 };
+};
+
+template<class T, class... Types>
+struct TypesCounter<T, Types...>
+{
+	enum { value = TypesCounter<Types...>::value + 1 };
+};
+
+template<class... Types>
+struct tuple_size {};
+
+template<class... Types>
+struct tuple_size<tuple<Types...>>
+{
+	enum { value = TypesCounter<Types...>::value};
+};
 
 template<class... Types>
 tuple<Types...> make_tuple(Types... args)
