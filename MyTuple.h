@@ -27,50 +27,36 @@ struct ValueHolder<T, Args...>
 };
 
 template<class... Args>
-class tuple
+struct tuple
 {
-public:
 	tuple(Args... args)
-		: m_values(args...)
+		: values(args...)
 	{}
 
-	ValueHolder<Args...> m_values;
+	ValueHolder<Args...> values;
 };
 
 template<int current, int sought, class... Types>
-struct TypesPicker {};
+struct TupleIterator {};
 
 template<int sought, class T, class... Types>
-struct TypesPicker<sought, sought, T, Types...>
+struct TupleIterator<sought, sought, T, Types...>
 {
 	typedef T type;
-};
-
-template<int current, int sought, class T, class... Types>
-struct TypesPicker<current, sought, T, Types...> 
-{
-	typedef typename TypesPicker<current + 1, sought, Types...>::type type;
-};
-
-template<int current, int sought, class... Types>
-struct ValuePicker {};
-
-template<int sought, class T, class... Types>
-struct ValuePicker<sought, sought, T, Types...>
-{
 	static auto& get(ValueHolder<T, Types...>& vh) { return vh.val; }
 };
 
 template<int current, int sought, class T, class... Types>
-struct ValuePicker<current, sought, T, Types...>
+struct TupleIterator<current, sought, T, Types...> 
 {
-	static auto& get(ValueHolder<T, Types...>& vh) { return ValuePicker<current + 1, sought, Types...>::get(vh.other); }
+	typedef typename TupleIterator<current + 1, sought, Types...>::type type;
+	static auto& get(ValueHolder<T, Types...>& vh) { return TupleIterator<current + 1, sought, Types...>::get(vh.other); }
 };
 
 template<int index, class ... Types>
-auto get(tuple<Types...>& t) -> typename TypesPicker<0, index, Types...>::type
+auto get(tuple<Types...>& t) -> typename TupleIterator<0, index, Types...>::type&
 {
-	auto& val = ValuePicker<0, index, Types...>::get(t.m_values);
+	auto& val = TupleIterator<0, index, Types...>::get(t.values);
 	return val;
 }
 
