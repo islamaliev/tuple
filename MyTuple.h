@@ -60,4 +60,10 @@ auto get(tuple<Types...>& t) -> typename TupleIterator<0, index, Types...>::type
 	return val;
 }
 
+template<class... Types>
+tuple<Types...> make_tuple(Types... args)
+{
+	return tuple<Types...>(args...);
+}
+
 }
