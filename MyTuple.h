@@ -7,9 +7,7 @@ struct ValueHolder;
 template<class T>
 struct ValueHolder<T> 
 { 
-	ValueHolder(T v)
-		: val(v)
-	{}
+	ValueHolder(T v) : val(v) {} 
 
 	T val;
 };
@@ -17,9 +15,7 @@ struct ValueHolder<T>
 template<class T>
 struct ValueHolder<T&>
 {
-	ValueHolder(T& v)
-		: val(v)
-	{}
+	ValueHolder(T& v) : val(v) {}
 
 	T& val;
 };
@@ -48,14 +44,22 @@ struct ValueHolder<T&, Types&...>
 	ValueHolder<Types&...> other;
 };
 
-template<class T>
-void assignValueHolder(ValueHolder<T&>& left, const ValueHolder<T>& right)
+struct _Ignore 
+{
+	template<class T>
+	void operator=(const T& other) const {}
+};
+
+constexpr _Ignore ignore{};
+
+template<class T1, class T2>
+void assignValueHolder(ValueHolder<T1&>& left, const ValueHolder<T2>& right)
 {
 	left.val = right.val;
 }
 
-template<class T, class... Types>
-void assignValueHolder(ValueHolder<T&, Types&...>& left, const ValueHolder<T, Types...>& right)
+template<class T1, class T2, class... Types1, class... Types2>
+void assignValueHolder(ValueHolder<T1&, Types1&...>& left, const ValueHolder<T2, Types2...>& right)
 {
 	left.val = right.val;
 	assignValueHolder(left.other, right.other);
@@ -108,12 +112,6 @@ struct TupleIterator<current, sought, T, Types...>
 
 template<int index, class ... Types>
 constexpr auto get(tuple<Types...>& t) noexcept -> typename TupleIterator<0, index, Types...>::type& 
-{
-	return TupleIterator<0, index, Types...>::get(t.values);
-}
-
-template<int index, class ... Types>
-constexpr auto get(const tuple<Types...>& t) noexcept -> const typename TupleIterator<0, index, Types...>::type& 
 {
 	return TupleIterator<0, index, Types...>::get(t.values);
 }

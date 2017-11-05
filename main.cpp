@@ -22,11 +22,18 @@ int main()
 
 	int li = 5;
 	double ld = 3.2;
-	tie(li, ld) = make_tuple(4, 2.2);
 
+	tie(li, ld) = make_tuple(4, 2.2);
 	assert(li == 4);
 	assert(ld == 2.2);
 
-	std::system("pause");
+	tie(ignore, ld) = make_tuple(5, 6);
+	assert(li == 4);
+	assert(ld == 6);
+
+	tie(li, ignore) = make_tuple(7, 8);
+	assert(li == 7);
+	assert(ld == 6);
+
 	return 0;
 }
