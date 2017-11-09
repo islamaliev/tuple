@@ -35,5 +35,13 @@ int main()
 	assert(li == 7);
 	assert(ld == 6);
 
+	tuple<int, double> tupInitList = { 1, 2.4 };
+	assert(get<1>(tupInitList) == 2.4);
+
+	auto te = std::is_same_v<tuple_element<0, tuple<int, float>>::type, int>;
+	assert(te);
+	te = std::is_same_v<tuple_element<1, tuple<int, float>>::type, float>;
+	assert(te);
+
 	return 0;
 }

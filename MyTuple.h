@@ -9,6 +9,8 @@ struct ValueHolder<T>
 { 
 	ValueHolder(T v) : val(v) {} 
 
+	ValueHolder() = default;
+
 	T val;
 };
 
@@ -27,6 +29,8 @@ struct ValueHolder<T, Types...>
 		: val(val1)
 		, other(args...)
 	{}
+
+	ValueHolder() = default;
 
 	T val;
 	ValueHolder<Types...> other;
@@ -72,6 +76,8 @@ struct tuple
 	tuple(Types2&&... args)
 		: values(std::forward<Types2>(args)...)
 	{}
+
+	tuple() = default;
 
 	ValueHolder<Types...> values;
 };
@@ -148,5 +154,14 @@ constexpr tuple<Types&...> tie(Types&... args) noexcept
 {
 	return make_tuple(args...);
 }
+
+template<int index, class T>
+struct tuple_element {};
+
+template<int index, class... Types>
+struct tuple_element<index, tuple<Types...>>
+{
+	typedef typename TupleIterator<0, index, Types...>::type type;
+};
 
 }
