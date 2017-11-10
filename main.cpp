@@ -35,6 +35,26 @@ int main()
 	assert(li == 7);
 	assert(ld == 6);
 
+	auto copyTuple = make_tuple(2, 3.3);
+	tie(li, ld) = copyTuple;
+	assert(li == 2);
+	assert(ld == 3.3);
+
+	get<0>(copyTuple) = 5;
+	get<1>(copyTuple) = 4.4;
+	assert(get<0>(copyTuple) == 5);
+	assert(get<1>(copyTuple) == 4.4);
+
+	tie(li, ld) = std::move(copyTuple);
+	assert(li == 5);
+	assert(ld == 4.4);
+
+	copyTuple = make_tuple(2, 3.3);
+	auto t2 = make_tuple(1, 0.3);
+	copyTuple = t2;
+	assert(get<0>(copyTuple) == 1);
+	assert(get<1>(copyTuple) == 0.3);
+
 	tuple<int, double> tupInitList = { 1, 2.4 };
 	assert(get<1>(tupInitList) == 2.4);
 
