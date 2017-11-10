@@ -92,6 +92,12 @@ struct tuple<Types&...>
 	template<class... Types2>
 	tuple<Types&...>& operator=(tuple<Types2...>&& other)
 	{
+		assignValueHolder(values, std::forward<tuple<Types2...>>(other).values);
+		return *this;
+	}
+
+	tuple& operator=(const tuple<Types...>& other)
+	{
 		assignValueHolder(values, other.values);
 		return *this;
 	}
