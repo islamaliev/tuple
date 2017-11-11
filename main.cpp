@@ -40,8 +40,8 @@ int main()
 	assert(li == 2);
 	assert(ld == 3.3);
 
-	get<0>(copyTuple) = 5;
-	get<1>(copyTuple) = 4.4;
+	get<int>(copyTuple) = 5;
+	get<double>(copyTuple) = 4.4;
 	assert(get<0>(copyTuple) == 5);
 	assert(get<1>(copyTuple) == 4.4);
 

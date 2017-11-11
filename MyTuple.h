@@ -106,26 +106,49 @@ struct tuple<Types&...>
 };
 
 template<int current, int sought, class... Types>
-struct TupleIterator {};
+struct TupleIndexIterator {};
 
 template<int sought, class T, class... Types>
-struct TupleIterator<sought, sought, T, Types...>
+struct TupleIndexIterator<sought, sought, T, Types...>
 {
 	typedef T type;
 	static type& get(ValueHolder<T, Types...>& vh) { return vh.val; }
 };
 
 template<int current, int sought, class T, class... Types>
-struct TupleIterator<current, sought, T, Types...> 
+struct TupleIndexIterator<current, sought, T, Types...>
 {
-	typedef typename TupleIterator<current + 1, sought, Types...>::type type;
-	static type& get(ValueHolder<T, Types...>& vh) { return TupleIterator<current + 1, sought, Types...>::get(vh.other); }
+	typedef typename TupleIndexIterator<current + 1, sought, Types...>::type type;
+	static type& get(ValueHolder<T, Types...>& vh) { return TupleIndexIterator<current + 1, sought, Types...>::get(vh.other); }
+};
+
+template<class... Types>
+struct TupleTypeIterator {};
+
+template<class T, class... Types>
+struct TupleTypeIterator<T, T, Types...>
+{
+	typedef T type;
+	static type& get(ValueHolder<T, Types...>& vh) { return vh.val; }
+};
+
+template<class T, class Head, class... Tail>
+struct TupleTypeIterator<T, Head, Tail...>
+{
+	typedef typename TupleTypeIterator<T, Tail...>::type type;
+	static type& get(ValueHolder<Head, Tail...>& vh) { return TupleTypeIterator<T, Tail...>::get(vh.other); }
 };
 
 template<int index, class ... Types>
-constexpr auto get(tuple<Types...>& t) noexcept -> typename TupleIterator<0, index, Types...>::type& 
+constexpr auto get(tuple<Types...>& t) noexcept -> typename TupleIndexIterator<0, index, Types...>::type& 
 {
-	return TupleIterator<0, index, Types...>::get(t.values);
+	return TupleIndexIterator<0, index, Types...>::get(t.values);
+}
+
+template<class T, class... Types>
+constexpr auto get(tuple<Types...>& t) noexcept -> typename TupleTypeIterator<T, Types...>::type&
+{
+	return TupleTypeIterator<T, Types...>::get(t.values);
 }
 
 template<class... Types>
@@ -167,7 +190,7 @@ struct tuple_element {};
 template<int index, class... Types>
 struct tuple_element<index, tuple<Types...>>
 {
-	typedef typename TupleIterator<0, index, Types...>::type type;
+	typedef typename TupleIndexIterator<0, index, Types...>::type type;
 };
 
 }
