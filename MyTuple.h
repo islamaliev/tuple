@@ -7,9 +7,9 @@ struct ValueHolder;
 template<class T>
 struct ValueHolder<T> 
 { 
-	ValueHolder(T v) : val(v) {} 
+	constexpr ValueHolder(T v) : val(v) {} 
 
-	ValueHolder() = default;
+	constexpr ValueHolder() = default;
 
 	T val;
 };
@@ -17,7 +17,7 @@ struct ValueHolder<T>
 template<class T>
 struct ValueHolder<T&>
 {
-	ValueHolder(T& v) : val(v) {}
+	constexpr ValueHolder(T& v) : val(v) {}
 
 	T& val;
 };
@@ -25,12 +25,12 @@ struct ValueHolder<T&>
 template<class T, class... Types>
 struct ValueHolder<T, Types...> 
 {
-	ValueHolder(T val1, Types... args)
+	constexpr ValueHolder(T val1, Types... args)
 		: val(val1)
 		, other(args...)
 	{}
 
-	ValueHolder() = default;
+	constexpr ValueHolder() = default;
 
 	T val;
 	ValueHolder<Types...> other;
@@ -39,7 +39,7 @@ struct ValueHolder<T, Types...>
 template<class T, class... Types>
 struct ValueHolder<T&, Types&...>
 {
-	ValueHolder(T& val1, Types&... args)
+	constexpr ValueHolder(T& val1, Types&... args)
 		: val(val1)
 		, other(args...)
 	{}
@@ -51,19 +51,19 @@ struct ValueHolder<T&, Types&...>
 struct _Ignore 
 {
 	template<class T>
-	void operator=(const T& other) const {}
+	constexpr void operator=(const T& other) const {}
 };
 
 constexpr _Ignore ignore{};
 
 template<class T1, class T2>
-void assignValueHolder(ValueHolder<T1&>& left, const ValueHolder<T2>& right)
+constexpr void assignValueHolder(ValueHolder<T1&>& left, const ValueHolder<T2>& right)
 {
 	left.val = right.val;
 }
 
 template<class T1, class T2, class... Types1, class... Types2>
-void assignValueHolder(ValueHolder<T1&, Types1&...>& left, const ValueHolder<T2, Types2...>& right)
+constexpr void assignValueHolder(ValueHolder<T1&, Types1&...>& left, const ValueHolder<T2, Types2...>& right)
 {
 	left.val = right.val;
 	assignValueHolder(left.other, right.other);
@@ -73,11 +73,11 @@ template<class... Types>
 struct tuple
 {
 	template<class... Types2>
-	tuple(Types2&&... args)
+	constexpr tuple(Types2&&... args)
 		: values(std::forward<Types2>(args)...)
 	{}
 
-	tuple() = default;
+	constexpr tuple() = default;
 
 	ValueHolder<Types...> values;
 };
@@ -85,18 +85,18 @@ struct tuple
 template<class... Types>
 struct tuple<Types&...>
 {
-	tuple(Types&... args)
+	constexpr tuple(Types&... args)
 		: values(args...)
 	{ }
 
 	template<class... Types2>
-	tuple<Types&...>& operator=(tuple<Types2...>&& other)
+	constexpr tuple<Types&...>& operator=(tuple<Types2...>&& other)
 	{
 		assignValueHolder(values, std::forward<tuple<Types2...>>(other).values);
 		return *this;
 	}
 
-	tuple& operator=(const tuple<Types...>& other)
+	constexpr tuple& operator=(const tuple<Types...>& other)
 	{
 		assignValueHolder(values, other.values);
 		return *this;
@@ -112,14 +112,14 @@ template<int sought, class T, class... Types>
 struct TupleIndexIterator<sought, sought, T, Types...>
 {
 	typedef T type;
-	static type& get(ValueHolder<T, Types...>& vh) { return vh.val; }
+	static constexpr type& get(ValueHolder<T, Types...>& vh) { return vh.val; }
 };
 
 template<int current, int sought, class T, class... Types>
 struct TupleIndexIterator<current, sought, T, Types...>
 {
 	typedef typename TupleIndexIterator<current + 1, sought, Types...>::type type;
-	static type& get(ValueHolder<T, Types...>& vh) { return TupleIndexIterator<current + 1, sought, Types...>::get(vh.other); }
+	static constexpr type& get(ValueHolder<T, Types...>& vh) { return TupleIndexIterator<current + 1, sought, Types...>::get(vh.other); }
 };
 
 template<class... Types>
@@ -129,14 +129,14 @@ template<class T, class... Types>
 struct TupleTypeIterator<T, T, Types...>
 {
 	typedef T type;
-	static type& get(ValueHolder<T, Types...>& vh) { return vh.val; }
+	static constexpr type& get(ValueHolder<T, Types...>& vh) { return vh.val; }
 };
 
 template<class T, class Head, class... Tail>
 struct TupleTypeIterator<T, Head, Tail...>
 {
 	typedef typename TupleTypeIterator<T, Tail...>::type type;
-	static type& get(ValueHolder<Head, Tail...>& vh) { return TupleTypeIterator<T, Tail...>::get(vh.other); }
+	static constexpr type& get(ValueHolder<Head, Tail...>& vh) { return TupleTypeIterator<T, Tail...>::get(vh.other); }
 };
 
 template<int index, class ... Types>
